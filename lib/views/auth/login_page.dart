@@ -5,7 +5,10 @@ import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _LoginPageState createState() => _LoginPageState();
 }
 
@@ -49,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sign In')),
+      appBar: AppBar(title: const Text('Sign In')),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Form(
@@ -58,12 +61,12 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Text('Sign In',
+              const Text('Sign In',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Phone',
                 ),
                 validator: (value) {
@@ -76,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Password'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
@@ -89,32 +92,33 @@ class _LoginPageState extends State<LoginPage> {
                 child: TextButton(
                   onPressed: _forgotPassword,
                   style: TextButton.styleFrom(
-                    foregroundColor: Color(0xFF0094FF),
+                    foregroundColor: const Color(0xFF0094FF),
                   ),
-                  child: Text('Forgot Password?'),
+                  child: const Text('Forgot Password?'),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // Make the ElevatedButton 80% of screen width
-              Container(
-                width: MediaQuery.of(context).size.width * 0.8,
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.9,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF0094FF), // Background color
+                      backgroundColor:
+                          const Color(0xFF0094FF), // Background color
                       foregroundColor: Colors.white,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                      textStyle: TextStyle(fontSize: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 15),
+                      textStyle: const TextStyle(fontSize: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
                       )),
                   onPressed: _login,
-                  child: Text('Sign In'),
+                  child: const Text('Sign In'),
                 ),
               ),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.0),
                 child: Text(
                   'By clicking “Sign in” you certify you agree to our terms and conditions',
                   style: TextStyle(
@@ -127,14 +131,14 @@ class _LoginPageState extends State<LoginPage> {
               RichText(
                   text: TextSpan(
                       text: 'New user?',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFF354044),
                         fontSize: 18,
                       ),
                       children: <TextSpan>[
                     TextSpan(
                       text: 'Register',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFF0094FF),
                         fontSize: 18,
                       ),
