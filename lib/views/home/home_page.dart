@@ -49,6 +49,13 @@ class HomePage extends StatelessWidget {
               },
               child: const Text('Speciality'),
             ),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to otp
+                Navigator.pushNamed(context, '/appointment');
+              },
+              child: const Text('Appointment'),
+            ),
           ],
         ),
       ),

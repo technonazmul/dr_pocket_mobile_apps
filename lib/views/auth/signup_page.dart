@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import '../../views/inc/custom_toast.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -20,9 +20,9 @@ class _SignupPageState extends State<SignupPage> {
   Future<void> _register() async {
     if (_formKey.currentState?.validate() ?? false) {
       // Handle registration logic here
-      Fluttertoast.showToast(msg: 'Registration successful');
+      showCustomToast(context, 'Registration successful');
     } else if (!_agreeToTerms) {
-      Fluttertoast.showToast(msg: 'You must agree to the terms and conditions');
+      showCustomToast(context, 'You must agree to the terms and conditions');
     }
   }
 
@@ -56,7 +56,7 @@ class _SignupPageState extends State<SignupPage> {
 
   void _forgotPassword() {
     // Navigate to forgot password page or show dialog
-    Fluttertoast.showToast(msg: 'Forgot Password Clicked');
+    showCustomToast(context, 'Forgot Password Clicked');
   }
 
   @override

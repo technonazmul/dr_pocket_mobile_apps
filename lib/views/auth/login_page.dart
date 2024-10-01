@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:fluttertoast/fluttertoast.dart';
+import '../../views/inc/custom_toast.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -29,24 +29,25 @@ class _LoginPageState extends State<LoginPage> {
           'password': _passwordController.text,
         }),
       );
+      if (!mounted) return;
       if (response.statusCode == 200) {
         // Handle success
-        Fluttertoast.showToast(msg: 'Login successful');
+        showCustomToast(context, 'Login successful');
       } else {
         // Handle failure
-        Fluttertoast.showToast(msg: 'Login failed');
+        showCustomToast(context, 'Login failed');
       }
     }
   }
 
   void _forgotPassword() {
     // Navigate to forgot password page or show dialog
-    Fluttertoast.showToast(msg: 'Forgot Password Clicked');
+    showCustomToast(context, 'Forgot Password Clicked');
   }
 
   void _register() {
     // Navigate to the register page
-    Fluttertoast.showToast(msg: 'Register Clicked');
+    showCustomToast(context, 'Register Clicked');
   }
 
   @override

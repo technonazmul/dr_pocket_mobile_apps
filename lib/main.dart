@@ -6,6 +6,7 @@ import 'views/home/home_page.dart';
 import 'views/home/edit_profile_page.dart';
 import 'views/home/speciality_page.dart';
 import 'views/others/splash_screen.dart';
+import '/views/home/appointment_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,7 +36,8 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignupPage(),
         '/otp': (context) => const OtpPage(),
         '/userprofile': (context) => const EditProfilePage(),
-        '/speciality': (context) => const SpecialityPage()
+        '/speciality': (context) => const SpecialityPage(),
+        '/appointment': (context) => const AppointmentPage(),
       },
     );
   }
