@@ -3,10 +3,12 @@ import 'views/auth/login_page.dart';
 import 'views/auth/signup_page.dart';
 import 'views/auth/otp_page.dart';
 import 'views/home/home_page.dart';
+import 'views/home/link_page.dart';
 import 'views/home/edit_profile_page.dart';
 import 'views/home/speciality_page.dart';
 import 'views/others/splash_screen.dart';
-import '/views/home/appointment_page.dart';
+import 'views/home/appointment_page.dart';
+import 'views/home/search_doctors_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,13 +33,15 @@ class MyApp extends StatelessWidget {
       initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashScreen(),
-        '/': (context) => const HomePage(),
+        '/': (context) => const LinkPage(),
+        '/home': (context) => const HomePage(),
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
         '/otp': (context) => const OtpPage(),
         '/userprofile': (context) => const EditProfilePage(),
         '/speciality': (context) => const SpecialityPage(),
         '/appointment': (context) => const AppointmentPage(),
+        '/doctorsearch': (context) => const DoctorSearchPage(),
       },
     );
   }

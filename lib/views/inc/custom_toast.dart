@@ -31,7 +31,7 @@ void showCustomToast(BuildContext context, String message) {
   );
 
   // Insert the toast into the widget tree
-  Overlay.of(context)!.insert(overlayEntry);
+  Overlay.of(context).insert(overlayEntry);
 
   // Remove the toast after a delay (2 seconds in this case)
   Timer(const Duration(seconds: 2), () {

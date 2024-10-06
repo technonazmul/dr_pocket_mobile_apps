@@ -16,7 +16,7 @@ class SplashScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: Container(
+        child: SizedBox(
           width: double.infinity, // Ensures it takes full width
           height: double.infinity, // Ensures it takes full height
           child: FittedBox(
