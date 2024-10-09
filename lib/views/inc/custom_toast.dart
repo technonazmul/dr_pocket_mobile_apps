@@ -6,7 +6,7 @@ void showCustomToast(BuildContext context, String message) {
   OverlayEntry overlayEntry = OverlayEntry(
     builder: (context) => Positioned(
       // Position the toast at the bottom of the screen
-      bottom: 50.0,
+      top: 50.0,
       left: MediaQuery.of(context).size.width * 0.2, // Center horizontally
       width: MediaQuery.of(context).size.width * 0.6,
       child: Material(

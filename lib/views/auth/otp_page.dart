@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OtpPage extends StatefulWidget {
   const OtpPage({super.key});
@@ -12,13 +15,49 @@ class _OtpPageState extends State<OtpPage> {
       List.generate(4, (index) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
 
-  void _verifyOtp() {
+  late String _phoneNumber;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Get the phone number passed from the SignupPage
+    _phoneNumber = ModalRoute.of(context)?.settings.arguments as String;
+  }
+
+  Future<void> _verifyOtp() async {
     String otp = _controllers.map((controller) => controller.text).join();
 
     if (otp.length == 4) {
-      print("OTP verified: $otp");
+      try {
+        final response = await http.post(
+          Uri.parse('http://localhost:5000/api/auth/verify-otp'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'phone': _phoneNumber, // Use the passed phone number here
+            'otp': otp,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          final responseData = jsonDecode(response.body);
+          final token = responseData['token'];
+
+          // Store the token locally, e.g., using shared_preferences
+          await SharedPreferences.getInstance().then((prefs) {
+            prefs.setString('token', token);
+          });
+
+          Navigator.pushNamed(context, '/home');
+        } else {
+          final errorData = jsonDecode(response.body);
+          final errorMessage = errorData['message'] ?? 'Unknown error';
+          print('Failed: $errorMessage');
+        }
+      } catch (e) {
+        print('An error occurred: $e');
+      }
     } else {
-      print("Invalid OTP");
+      print('Invalid OTP');
     }
   }
 

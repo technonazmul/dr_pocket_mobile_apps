@@ -14,12 +14,14 @@ class _HomePageState extends State<HomePage> {
   String query = '';
   bool isLoading = true;
   List<dynamic> specialities = [];
+  List<dynamic> banners = [];
 
   @override
   void initState() {
     super.initState();
     fetchDoctors();
     fetchSpecialities();
+    fetchBanners();
   }
 
   Future<void> fetchDoctors() async {
@@ -48,6 +50,21 @@ class _HomePageState extends State<HomePage> {
       if (response.statusCode == 200) {
         setState(() {
           specialities = json.decode(response.body);
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> fetchBanners() async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://127.0.0.1:5000/api/backend/banners'));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          banners = json.decode(response.body);
         });
       }
     } catch (e) {
@@ -373,6 +390,44 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Widget to display the banner slider
+  Widget buildBannerSlider() {
+    if (banners.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return SizedBox(
+      height: 170, // Set the height of the slider
+      child: PageView.builder(
+        itemCount: banners.length,
+        itemBuilder: (context, index) {
+          // Safely access banner data
+          final banner = banners[index];
+          final imageUrl = banner['image'] != null
+              ? 'http://127.0.0.1:5000/uploads/${banner['image']}'
+              : ''; // Handle null image gracefully
+
+          return Container(
+              color: Colors.white,
+              padding: const EdgeInsets.only(
+                  left: 16.0, right: 16.0, top: 16.0, bottom: 16.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageUrl.isNotEmpty
+                        ? NetworkImage(imageUrl)
+                        : const AssetImage('assets/default_image.png')
+                            as ImageProvider, // Use a default image if URL is empty
+                    fit: BoxFit.contain,
+                  ),
+                  borderRadius: BorderRadius.circular(0),
+                ),
+              ));
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -428,6 +483,8 @@ class _HomePageState extends State<HomePage> {
                       ? Column(
                           children: [
                             buildSpecilities(),
+                            const SizedBox(height: 20),
+                            buildBannerSlider(),
                             Container(
                               color: Colors.white,
                               margin: const EdgeInsets.only(top: 20.0),
