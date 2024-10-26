@@ -19,12 +19,20 @@ class _SignupPageState extends State<SignupPage> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _agreeToTerms = false; // Check state
+  bool _isButtonDisabled = false;
 
   Future<void> _register() async {
     if (_formKey.currentState?.validate() ?? false) {
       if (_agreeToTerms) {
+        String phoneNumber = _phoneController.text;
+        Navigator.pushNamed(
+          context,
+          '/otp',
+          arguments: phoneNumber,
+        );
         // Handle registration logic here
         try {
+          _isButtonDisabled = true;
           // Prepare the registration data
           final response = await http.post(
             Uri.parse('http://localhost:5000/api/auth/register'),
@@ -58,6 +66,7 @@ class _SignupPageState extends State<SignupPage> {
             final errorData = jsonDecode(response.body);
             final errorMessage = errorData['message'] ?? 'Unknown error';
             showCustomToast(context, 'Failed: $errorMessage');
+            _isButtonDisabled = false;
           }
         } catch (e) {
           showCustomToast(context, 'An error occured: $e');
@@ -217,8 +226,17 @@ class _SignupPageState extends State<SignupPage> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    onPressed: _register,
-                    child: const Text('Sign Up'),
+                    onPressed: _isButtonDisabled ? null : _register,
+                    child: _isButtonDisabled
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              strokeWidth: 2.0,
+                            ))
+                        : const Text('Sign Up'),
                   ),
                 ),
                 Padding(

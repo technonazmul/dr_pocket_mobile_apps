@@ -64,6 +64,8 @@ flutter:
         - asset: assets/fonts/Inter.ttf
         - asset: assets/default_profile.png
         - asset: assets/images/splash.png
+        - asset: assets/no_profile_picture.jpg
+        - asset: assets/no_profile_picture.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

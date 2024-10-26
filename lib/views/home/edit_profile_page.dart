@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../views/inc/custom_toast.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -9,15 +13,74 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
   String _selectedGender = 'Male';
   final List<String> _genderOptions = ['Male', 'Female', 'Other'];
+  bool _isLoading = true;
+  String? token = null;
 
-  void _completeProfile() {
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfile();
+  }
+
+  Future<void> _fetchUserProfile() async {
+    try {
+      // Retrive the token
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      token = prefs.getString('token');
+
+      if (token == null) {
+        print('token not found');
+        return;
+      }
+      final response = await http.get(
+        Uri.parse('http://localhost:5000/api/app/user'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final user = data['user'];
+
+        // set the value of name and gender
+        setState(() {
+          _nameController.text = user['name'] ?? '';
+          _selectedGender = user['gender'] ?? 'Male';
+          _isLoading = false;
+        });
+      } else {
+        print('Failed to load profile');
+      }
+    } catch (error) {
+      print('Error fetching profile: $error');
+    }
+  }
+
+  void _completeProfile() async {
     // Logic to handle profile completion
     String name = _nameController.text;
-    String phone = _phoneController.text;
     String gender = _selectedGender;
+
+    try {
+      final response = await http.post(
+          Uri.parse('http://localhost:5000/api/app/userprofileupdate'),
+          headers: {
+            'Authorization': 'Bearer $token'
+          },
+          body: {
+            'name': _nameController.text,
+            'gender': _selectedGender,
+          });
+
+      if (response.statusCode == 200) {
+        showCustomToast(context, 'Updated.');
+      }
+    } catch (error) {
+      print('Error fetching profile: $error');
+    }
 
     if (name.isNotEmpty) {
       // Proceed with profile completion logic
@@ -32,112 +95,87 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Profile'),
+        title: const Text('My Profile'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Profile Image with upload feature
-            Stack(
-              children: [
-                // Circular Profile Image
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-                  child: ClipOval(
-                    // Ensure the image is clipped within a circle
-                    child: Image.asset(
-                      'assets/default_profile.png',
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit
-                          .cover, // This ensures the image covers the circle
+      backgroundColor: Colors.white,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Profile Image with upload feature
+                  const SizedBox(height: 20),
+
+                  // Name Field
+                  TextField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Name',
+                      prefixIcon: const Icon(Icons.person),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: const BorderSide(
+                          color: Colors.grey,
+                          width: 1.0,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                // Plus Icon for Upload
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.circle,
+
+                  const SizedBox(height: 20),
+
+                  // Gender Dropdown
+                  DropdownButtonFormField<String>(
+                    value: _selectedGender,
+                    decoration: InputDecoration(
+                      labelText: 'Gender',
+                      prefixIcon: const Icon(Icons.male),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: const BorderSide(
+                          color: Colors.grey,
+                          width: 1.0,
+                        ),
+                      ),
                     ),
-                    child: IconButton(
-                      icon: const Icon(Icons.add, color: Colors.white),
-                      onPressed: () {
-                        // Logic to upload profile picture
-                        print('Upload profile picture');
-                      },
+                    items: _genderOptions.map((String gender) {
+                      return DropdownMenuItem<String>(
+                        value: gender,
+                        child: Text(gender),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedGender = newValue!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 30),
+
+                  // Complete Profile Button
+                  SizedBox(
+                    width: double.infinity, // Full-width button
+                    child: ElevatedButton(
+                      onPressed: _completeProfile,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        backgroundColor: Colors.blue,
+                      ),
+                      child: const Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Name Field
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
+                ],
               ),
             ),
-
-            const SizedBox(height: 20),
-            // Name Field
-            TextField(
-              controller: _phoneController,
-              decoration: const InputDecoration(
-                labelText: 'Phone',
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Gender Dropdown
-            DropdownButtonFormField<String>(
-              value: _selectedGender,
-              decoration: const InputDecoration(
-                labelText: 'Gender',
-              ),
-              items: _genderOptions.map((String gender) {
-                return DropdownMenuItem<String>(
-                  value: gender,
-                  child: Text(gender),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedGender = newValue!;
-                });
-              },
-            ),
-            const SizedBox(height: 30),
-
-            // Complete Profile Button
-            SizedBox(
-              width: double.infinity, // Full-width button
-              child: ElevatedButton(
-                onPressed: _completeProfile,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  backgroundColor: Colors.blue,
-                ),
-                child: const Text(
-                  'Complete Your Profile',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

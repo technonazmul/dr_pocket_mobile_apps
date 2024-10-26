@@ -9,6 +9,11 @@ import 'views/home/speciality_page.dart';
 import 'views/others/splash_screen.dart';
 import 'views/home/appointment_page.dart';
 import 'views/home/search_doctors_page.dart';
+import 'views/home/search_doctors_by_speciality_page.dart';
+import 'views/home/profilesetting_page.dart';
+import 'views/home/change_password_page.dart';
+import 'views/home/notification_page.dart';
+import 'views/home/myappointment_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -42,6 +47,12 @@ class MyApp extends StatelessWidget {
         '/speciality': (context) => const SpecialityPage(),
         '/appointment': (context) => const AppointmentPage(),
         '/doctorsearch': (context) => const DoctorSearchPage(),
+        '/doctorsearchbyspeciality': (context) =>
+            const DoctorSearchBySpecialityPage(),
+        '/profilesetting': (context) => const ProfileSettingPage(),
+        '/changepassword': (context) => const ChangePasswordPage(),
+        '/notifications': (context) => const NotificationPage(),
+        '/myappointment': (context) => const MyAppointmentPage(),
       },
     );
   }

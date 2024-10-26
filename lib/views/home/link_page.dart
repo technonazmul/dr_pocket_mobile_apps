@@ -37,11 +37,11 @@ class LinkPage extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                // Navigate to otp
-                Navigator.pushNamed(context, '/userprofile');
+                Navigator.pushNamed(context, '/profilesetting');
               },
-              child: const Text('Profile'),
+              child: const Text('Profile Setting'),
             ),
+
             ElevatedButton(
               onPressed: () {
                 // Navigate to otp
@@ -69,6 +69,20 @@ class LinkPage extends StatelessWidget {
                 Navigator.pushNamed(context, '/home');
               },
               child: const Text('Home'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to otp
+                Navigator.pushNamed(context, '/notifications');
+              },
+              child: const Text('Notifications'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to otp
+                Navigator.pushNamed(context, '/myappointment');
+              },
+              child: const Text('My Appointment'),
             ),
           ],
         ),

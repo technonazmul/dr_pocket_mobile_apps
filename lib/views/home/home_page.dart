@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -10,6 +12,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String? userName;
+  String? profileImage;
+  bool isLoggedIn = false;
   List doctors = [];
   String query = '';
   bool isLoading = true;
@@ -19,9 +24,41 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _checkLoginStatus();
     fetchDoctors();
     fetchSpecialities();
     fetchBanners();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    if (token != null) {
+      try {
+        final response = await http.get(
+          Uri.parse('http://localhost:5000/api/app/user'),
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          final user = data['user'];
+          setState(() {
+            isLoggedIn = true;
+            userName = user['name'];
+            profileImage = user['image'];
+          });
+        } else if (response.statusCode == 403) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      } catch (error) {
+        print(error);
+      }
+    } else {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   Future<void> fetchDoctors() async {
@@ -40,6 +77,14 @@ class _HomePageState extends State<HomePage> {
       });
       print(e);
     }
+  }
+
+  fetchDoctorsBySpecility(specialityId) {
+    Navigator.pushNamed(
+      context,
+      '/doctorsearchbyspeciality',
+      arguments: specialityId,
+    );
   }
 
   Future<void> fetchSpecialities() async {
@@ -307,46 +352,52 @@ class _HomePageState extends State<HomePage> {
     return Row(children: stars);
   }
 
-  Widget _buildSpecialityCard(String name, String imagePath) {
+  Widget _buildSpecialityCard(
+      String name, String imagePath, String specialityId) {
     double screenWidth = MediaQuery.of(context).size.width;
     double cardWidth =
         (screenWidth - 48) / 4; // Subtracting padding and spacing
 
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.all(0), // Adjust as needed
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Container(
-        width: cardWidth, // Set card width based on screen size
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.network(
-              'http://127.0.0.1:5000/uploads/$imagePath',
-              height: 60,
-              width: 60,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.broken_image, size: 80);
-              },
+    return GestureDetector(
+        onTap: () {
+          fetchDoctorsBySpecility(specialityId);
+        },
+        child: Card(
+          elevation: 0,
+          margin: const EdgeInsets.all(0), // Adjust as needed
+          color: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Container(
+            width: cardWidth, // Set card width based on screen size
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.network(
+                  'http://127.0.0.1:5000/uploads/$imagePath',
+                  height: 60,
+                  width: 60,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.broken_image, size: 80);
+                  },
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  // Center the text
+                  child: Text(
+                    name,
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w500),
+                    textAlign:
+                        TextAlign.center, // Center text for better alignment
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Center(
-              // Center the text
-              child: Text(
-                name,
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center, // Center text for better alignment
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 
   Widget buildSpecilities() {
@@ -382,6 +433,7 @@ class _HomePageState extends State<HomePage> {
               return _buildSpecialityCard(
                 specialities[index]['name'],
                 specialities[index]['image'],
+                specialities[index]['_id'],
               );
             }),
           ),
@@ -436,21 +488,42 @@ class _HomePageState extends State<HomePage> {
         toolbarHeight: 100,
         title: Row(
           children: [
-            // Profile Picture
-            const Padding(
-              padding: EdgeInsets.all(10.0), // Adds padding around the avatar
-              child: CircleAvatar(
-                radius: 25, // Set radius to 40 for the larger profile picture
-                backgroundImage: NetworkImage(
-                    'http://localhost:5000/uploads/1727351586662.png'), // Your image URL
-              ),
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/profilesetting');
+              },
+              child: profileImage != null
+                  ?
+                  // Profile Picture
+                  Padding(
+                      padding: const EdgeInsets.all(
+                          10.0), // Adds padding around the avatar
+                      child: CircleAvatar(
+                        radius:
+                            25, // Set radius to 40 for the larger profile picture
+                        backgroundImage: NetworkImage(
+                            'http://localhost:5000/uploads/$profileImage'), // Your image URL
+                      ),
+                    )
+                  :
+                  // Profile Picture
+                  const Padding(
+                      padding: EdgeInsets.all(
+                          10.0), // Adds padding around the avatar
+                      child: CircleAvatar(
+                        radius:
+                            25, // Set radius to 40 for the larger profile picture
+                        backgroundImage: AssetImage(
+                            'assets/no_profile_picture.jpg'), // Your image URL
+                      ),
+                    ),
             ),
             const SizedBox(width: 8),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Welcome", style: TextStyle(fontSize: 14)),
-                Text("Your Name", style: TextStyle(fontSize: 18)),
+                const Text("Welcome", style: TextStyle(fontSize: 14)),
+                Text(userName ?? '', style: const TextStyle(fontSize: 18)),
               ],
             ),
             // Spacer to push notification icon to the right
