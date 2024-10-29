@@ -1,3 +1,4 @@
+import 'views/home/appointment_history_page.dart';
 import 'package:flutter/material.dart';
 import 'views/auth/login_page.dart';
 import 'views/auth/signup_page.dart';
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
         '/changepassword': (context) => const ChangePasswordPage(),
         '/notifications': (context) => const NotificationPage(),
         '/myappointment': (context) => const MyAppointmentPage(),
+        '/appointmenthistory': (context) => const AppointmentHistoryPage(),
       },
     );
   }
