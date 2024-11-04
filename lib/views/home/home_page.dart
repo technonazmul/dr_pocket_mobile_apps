@@ -63,8 +63,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> fetchDoctors() async {
     try {
-      final response = await http
-          .get(Uri.parse('http://localhost:5000/api/backend/doctors'));
+      final response =
+          await http.get(Uri.parse('http://localhost:5000/api/app/doctors'));
       if (response.statusCode == 200) {
         setState(() {
           doctors = json.decode(response.body);
@@ -247,6 +247,7 @@ class _HomePageState extends State<HomePage> {
                       icon: const Icon(Icons.favorite_border),
                       onPressed: () {
                         // Add functionality for wish button
+                        print('Test Favorite Clicked');
                       },
                     ),
                   ],
@@ -275,7 +276,13 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ElevatedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            // Navigator.pushNamed(context, '/appointment',
+                            //     arguments: {'doctorId': doctor['_id']});
+
+                            Navigator.pushNamed(context, '/appointment',
+                                arguments: doctor['_id']);
+                          },
                           icon: const Icon(
                             Icons.calendar_month_outlined,
                             color: Colors.black,

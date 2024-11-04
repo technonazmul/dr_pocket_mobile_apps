@@ -91,6 +91,13 @@ class LinkPage extends StatelessWidget {
               },
               child: const Text('Appointment History'),
             ),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to otp
+                Navigator.pushNamed(context, '/favoritedoctors');
+              },
+              child: const Text('Favorite Doctors'),
+            ),
           ],
         ),
       ),

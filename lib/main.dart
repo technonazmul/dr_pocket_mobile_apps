@@ -15,6 +15,7 @@ import 'views/home/profilesetting_page.dart';
 import 'views/home/change_password_page.dart';
 import 'views/home/notification_page.dart';
 import 'views/home/myappointment_page.dart';
+import 'views/home/favorite_doctors_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
         '/notifications': (context) => const NotificationPage(),
         '/myappointment': (context) => const MyAppointmentPage(),
         '/appointmenthistory': (context) => const AppointmentHistoryPage(),
+        '/favoritedoctors': (context) => const FavoriteDoctorsPage(),
       },
     );
   }

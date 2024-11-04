@@ -1,91 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class AppointmentHistoryPage extends StatefulWidget {
-  const AppointmentHistoryPage({super.key});
+class FavoriteDoctorsPage extends StatefulWidget {
+  const FavoriteDoctorsPage({super.key});
 
   @override
-  _AppointmentHistoryPageState createState() => _AppointmentHistoryPageState();
+  _FavoriteDoctorsPageState createState() => _FavoriteDoctorsPageState();
 }
 
-class _AppointmentHistoryPageState extends State<AppointmentHistoryPage> {
+class _FavoriteDoctorsPageState extends State<FavoriteDoctorsPage> {
+  List doctors = [];
+  String query = '';
+  bool isLoading = true; // State variable for loading indicator
+
   @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('My Appointments'),
-          bottom: const TabBar(
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white,
-            indicatorColor: Colors.white,
-            tabs: [
-              Tab(text: 'Upcoming'),
-              Tab(text: 'Completed'),
-              Tab(text: 'Cancelled'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            AppointmentListView(status: "upcoming"),
-            AppointmentListView(status: "completed"),
-            AppointmentListView(status: "cancelled"),
-          ],
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    fetchDoctors();
   }
-}
 
-class AppointmentListView extends StatelessWidget {
-  final String status;
+  Future<void> fetchDoctors() async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://localhost:5000/api/backend/doctors'));
+      if (response.statusCode == 200) {
+        setState(() {
+          doctors = json.decode(response.body);
+          isLoading = false; // Set loading to false once data is fetched
+        });
+      } else {
+        throw Exception('Failed to load doctors');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false; // Set loading to false on error
+      });
+      print(e);
+    }
+  }
 
-  const AppointmentListView({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    // Sample data
-    final appointments = [
-      {
-        "id": 1,
-        "doctor": "Dr. Smith",
-        "image": "1727847618761.png",
-        "designation": "surgeon . Apollo Mehta hospital",
-        "date": "Oct 30, 2024",
-        "time": "10:00AM - 10:15AM",
-        "status": "upcoming"
-      },
-      {
-        "id": 2,
-        "doctor": "Dr. John",
-        "image": "1727847618761.png",
-        "designation": "surgeon . Apollo Mehta hospital",
-        "date": "Oct 30, 2024",
-        "time": "10:00AM - 10:15AM",
-        "status": "completed"
-      },
-      {
-        "id": 3,
-        "doctor": "Dr. Emily",
-        "image": "1727847618761.png",
-        "designation": "surgeon . Apollo Mehta hospital",
-        "date": "Oct 30, 2024",
-        "time": "10:00AM - 10:15AM",
-        "status": "cancelled"
-      },
-    ];
-
-    final filteredAppointments = appointments
-        .where((appointment) => appointment['status'] == status)
-        .toList();
+  Widget buildDoctorList() {
+    if (doctors.isEmpty) {
+      return const Center(child: Text('No doctors found'));
+    }
 
     return ListView.builder(
-      itemCount: filteredAppointments.length,
+      itemCount: doctors.length,
       itemBuilder: (context, index) {
-        final appointment = filteredAppointments[index];
+        final doctor = doctors[index];
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           color: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4.0),
@@ -103,9 +68,9 @@ class AppointmentListView extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
-                      child: appointment['image'] != null
+                      child: doctor['image'] != null
                           ? Image.network(
-                              'http://localhost:5000/uploads/1727847618761.png',
+                              'http://localhost:5000/uploads/${doctor['image']}',
                               width: 60,
                               height: 60,
                               fit: BoxFit.cover,
@@ -123,41 +88,26 @@ class AppointmentListView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Dr. Janitor Jolly',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            doctor['name'] ?? 'Unknown Doctor',
+                            style: const TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            'Surgon apollo hospital',
-                            style: TextStyle(color: Color(0xFF979797)),
-                          ),
-                          Row(children: [
-                            Text('Video Call'),
-                            SizedBox(width: 10),
-                            Text('Scheduled',
-                                style: TextStyle(color: Color(0xFF0094FF))),
-                          ]),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.access_time_outlined,
-                                color: Color(0xFF0094FF),
-                                size: 14,
-                              ),
-                              SizedBox(width: 5),
-                              Text(
-                                'Today 10:00am - 11:00am',
-                                style: TextStyle(color: Color(0xFF354044)),
-                              ),
-                            ],
+                            doctor['designationAndDepartment'] ??
+                                'No designation available',
+                            style: const TextStyle(
+                                fontSize: 12, color: Color(0xFF979797)),
                           ),
                           const SizedBox(height: 4),
+                          buildStarRating(doctor['rating'] ?? 5),
                         ],
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.phone, color: Color(0xFF0094FF)),
+                      icon: const Icon(
+                        Icons.favorite,
+                        color: Color(0xFFFF0000),
+                      ),
                       onPressed: () {
                         // Add functionality for wish button
                       },
@@ -193,15 +143,19 @@ class AppointmentListView extends StatelessWidget {
                       children: [
                         ElevatedButton.icon(
                           onPressed: () {},
-                          label: const Text("Scheduled",
-                              style: TextStyle(color: Colors.white)),
+                          icon: const Icon(
+                            Icons.calendar_month_outlined,
+                            color: Colors.black,
+                          ),
+                          label: const Text("Appointment",
+                              style: TextStyle(color: Colors.black)),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 30, vertical: 10),
+                                horizontal: 20, vertical: 10),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(2),
                             ),
-                            backgroundColor: const Color(0xFF0094FF),
+                            backgroundColor: const Color(0xFFEBEFF2),
                             elevation: 0,
                           ),
                         ),
@@ -217,7 +171,7 @@ class AppointmentListView extends StatelessWidget {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
+                                horizontal: 20, vertical: 12),
                             decoration: BoxDecoration(
                               color: const Color(
                                   0xFFEBEFF2), // Background color of the button
@@ -250,6 +204,43 @@ class AppointmentListView extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget buildStarRating(double rating) {
+    int fullStars = rating.floor();
+    bool halfStar = (rating - fullStars) >= 0.5;
+    int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+    List<Widget> stars = [];
+    for (int i = 0; i < fullStars; i++) {
+      stars.add(const Icon(Icons.star, color: Colors.amber, size: 20));
+    }
+    if (halfStar) {
+      stars.add(const Icon(Icons.star_half, color: Colors.amber, size: 20));
+    }
+    for (int i = 0; i < emptyStars; i++) {
+      stars.add(const Icon(Icons.star_border, color: Colors.amber, size: 20));
+    }
+
+    return Row(children: stars);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Favorite Doctor'),
+        centerTitle: true,
+      ),
+      body: isLoading // Show loading indicator while fetching data
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                const SizedBox(height: 30),
+                Expanded(child: buildDoctorList()),
+              ],
+            ),
     );
   }
 }
